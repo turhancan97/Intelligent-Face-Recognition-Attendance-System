@@ -43,7 +43,22 @@
             <iframe id="video" src="/video_feed"></iframe>
         </div>
         <button id="capture-button">Capture</button>
-    </div>    
+        <button id="recognize-button">Recognize Face</button>
+    </div>
+
+    <script>
+        document.getElementById('recognize-button').addEventListener('click', function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/recognize', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Redirect to the face recognition page
+                    window.location.href = '/face_recognition';
+                }
+            };
+            xhr.send();
+        });
+    </script>    
 
     <script>
         document.getElementById('capture-button').addEventListener('click', function() {

@@ -5,11 +5,73 @@ import cv2
 import numpy as np
 import io
 from PIL import Image
+from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 from firebase_admin import storage
-from detection.face_matching import * 
+from detection.face_matching import *
+
+ # Initialize Firebase
+cred = credentials.Certificate("database/serviceAccountKey.json")
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://face-recognition-486cb-default-rtdb.firebaseio.com/',
+    'storageBucket': 'face-recognition-486cb.appspot.com'
+    })
+
+def upload_database(filename):
+    valid = False
+    # If the fileName exists in the database storage, then continue
+    if storage.bucket().get_blob(filename):
+        valid = True
+        error =  f'<h1>{filename} already exists in the database</h1>'
+    
+    # First check if the name of the file is a number
+    if not filename[:-4].isdigit():
+        valid = True
+        error = f'<h1>Please make sure that the name of the {filename} is a number</h1>'
+
+    if not valid:
+        # Image to database
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        bucket = storage.bucket()
+        blob = bucket.blob(filename)
+        blob.upload_from_filename(filename)
+        error = None
+
+    return valid, error
+
+def match_with_database(img,database):
+    # Detect faces in the frame
+    faces = detect_faces(img)
+
+    # Draw the rectangle around each face
+    for (x, y, w, h) in faces:
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 4)
+    
+    # save the image 
+    cv2.imwrite('static/recognized/recognized.png', img)
+
+    for face in faces:
+        try:
+            # Align the face
+            aligned_face = align_face(img, face)
+
+            # Extract features from the face
+            embedding = extract_features(aligned_face)
+
+            embedding = embedding[0]['embedding']
+
+            # Match the face to a face in the database
+            match = match_face(embedding,database)
+
+            if match is not None:
+                return f'Match found: {match}'
+            else:
+                return 'No match found'
+        except:
+            return 'No face detected'
+        # break # TODO: remove this line to detect all faces in the frame
 
 app = Flask(__name__, template_folder='template')
 
@@ -44,8 +106,11 @@ def upload():
         # change the name of the file to the studentId
         # Information to database
         ref = db.reference('Students')
-        # Obtain the last studentId number from the database
-        studentId = len(ref.get())
+        try:
+            # Obtain the last studentId number from the database
+            studentId = len(ref.get())
+        except TypeError:
+            studentId = 1
 
         filename = f'{studentId}.png'
 
@@ -74,8 +139,9 @@ def allowed_file(filename):
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
     # Generate the URL of the image
-    url = url_for('static', filename='images/' + filename)
+    url = url_for('static', filename='images/' + filename,v=timestamp)
     # Return an HTML string that includes an <img> tag
     return f'<h1>File uploaded successfully</h1><img src="{url}" alt="Uploaded image">'
 
@@ -91,8 +157,13 @@ def capture():
     if ret:
         # Information to database
         ref = db.reference('Students')
-        # Obtain the last studentId number from the database
-        studentId = len(ref.get())
+        
+        try:
+            # Obtain the last studentId number from the database
+            studentId = len(ref.get())
+        
+        except TypeError:
+            studentId = 1
 
         # Save the image
         filename = f'{studentId}.png'
@@ -109,8 +180,9 @@ def capture():
 
 @app.route('/success/<filename>')
 def success(filename):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
     # Generate the URL of the image
-    url = url_for('static', filename='images/' + filename)
+    url = url_for('static', filename='images/' + filename,v=timestamp)
     # Return an HTML string that includes an <img> tag
     return f'<h1>{filename} image uploaded successfully to the database</h1><img src="{url}" alt="Uploaded image">'
 
@@ -156,6 +228,39 @@ def submit_info():
 
     return redirect(url_for('success', filename=filename))
 
+@app.route('/recognize', methods=['POST'])
+def recognize():
+    global detection
+    ret, frame = video.read()
+    if ret:
+        # Information to database
+        ref = db.reference('Students')
+        # Obtain the last studentId number from the database
+        number_student = len(ref.get())
+        print('There are',number_student,'students in the database')
+
+        database = {}
+        for i in range(1,number_student):
+            studentInfo = db.reference(f'Students/{i}').get()
+            studentName = studentInfo['name']
+            studentEmbedding = studentInfo['embeddings']
+            database[studentName] = studentEmbedding
+
+        detection = match_with_database(frame,database)
+        
+
+    # Return a successful response
+    return redirect(url_for('face_recognition'))
+
+@app.route('/face_recognition')
+def face_recognition():
+    # Generate the URL of the image
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
+    url = url_for('static', filename='recognized/recognized.png',v=timestamp)
+
+    # Render the template, passing the detection result and image URL
+    return f'<h2>Detection Result: {detection}</h2><img src="{url}" alt="Recognized face">'
+
 def gen_frames():
     global video
     video = cv2.VideoCapture(0)
@@ -170,33 +275,4 @@ def gen_frames():
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 if __name__ == '__main__':
-    # Initialize Firebase
-    cred = credentials.Certificate("database/serviceAccountKey.json")
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://face-recognition-486cb-default-rtdb.firebaseio.com/',
-        'storageBucket': 'face-recognition-486cb.appspot.com'
-        })
-    
-    def upload_database(filename):
-        valid = False
-        # If the fileName exists in the database storage, then continue
-        if storage.bucket().get_blob(filename):
-            valid = True
-            error =  f'<h1>{filename} already exists in the database</h1>'
-        
-        # First check if the name of the file is a number
-        if not filename[:-4].isdigit():
-            valid = True
-            error = f'<h1>Please make sure that the name of the {filename} is a number</h1>'
-
-        if not valid:
-            # Image to database
-            filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            bucket = storage.bucket()
-            blob = bucket.blob(filename)
-            blob.upload_from_filename(filename)
-            error = None
-
-        return valid, error
-
     app.run(debug=True)

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Recognition</title>
+    <style>
+        #left-column {
+            float: left;
+            width: 20%;
+        }
+        #right-column {
+            float: right;
+            width: 80%;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 60%; /* This is for a 4:3 aspect ratio, adjust as needed */
+            overflow: hidden;
+        }
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Face Recognition System</h1>
+
+    <div id="left-column">
+        <h2>Upload a new face</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file">
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+    
+    <div id="right-column">
+        <h2>Capture a new face</h2>
+        <div class="video-container">
+            <iframe id="video" src="/video_feed"></iframe>
+        </div>
+        <button id="capture-button">Capture</button>
+    </div>    
+
+    <script>
+        document.getElementById('capture-button').addEventListener('click', function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/capture', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Change the location of the window object to the success page
+                    window.location.href = '/add_info';
+                }
+            };
+            xhr.send();
+        });
+    </script>
+</body>
+</html>

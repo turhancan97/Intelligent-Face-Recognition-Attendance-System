@@ -112,10 +112,12 @@ This section sets the foundation for the project and provides a clear understand
 This section involves a lot of technical work and requires a good understanding of Python, OpenCV, Firebase, and web development. It's important to test each component as it's developed to catch any issues early and ensure that the final system functions as expected.
 
 # TODO
-- [ ] Arayüz eklenecek (Yoklama alınacak şekilde) - streamlit?
-- [ ] Resim ve information ekleme daha otomatik hale gelecek
+- [x] Arayüz eklenecek (Yoklama alınacak şekilde) - streamlit?
+- [x] Resim ve information ekleme daha otomatik hale gelecek
 - [ ] Dosyalar düzenlecenek. Daha modüler hale gelicek
-- [ ] Kameradan gelen veriyi tanıma eklenecek
+- [x] Kameradan gelen veriyi tanıma eklenecek
 - [ ] Yoklama sistemi eklenecek 
-- [ ] pip install pipreqs
-- [ ] Github'a yükleme yapılacak
+- [x] pip install pipreqs
+- [x] Github'a yükleme yapılacak
+- [ ] Bİlgi ekleme de mesela student ve teacher kısmı sadece iki seçenek olacak.
+- [ ] Arayüz güzelleştirilecek

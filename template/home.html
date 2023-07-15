@@ -5,11 +5,11 @@
     <style>
         #left-column {
             float: left;
-            width: 20%;
+            width: 25%;
         }
         #right-column {
             float: right;
-            width: 80%;
+            width: 75%;
         }
         .video-container {
             position: relative;
@@ -27,23 +27,30 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to the Face Recognition System</h1>
+    <h1>Welcome to our Face Detection System for our University Attendance System.</h1>
 
     <div id="left-column">
-        <h2>Upload a new face</h2>
+        <h2>Upload a new face as image</h2>
+        <h3>Click the button below to upload a new face as image</h3>
+        <p>NOTE: This will only work if you are not in our database</p>
         <form action="/upload" method="post" enctype="multipart/form-data">
             <input type="file" name="file">
             <input type="submit" value="Upload">
         </form>
+        <h2>Add yourself to the attendance list</h2>
+        <h3>Click the button below to recognize your face from the database</h3>
+        <p>NOTE: This will only work if you have already captured a face from the camera</p>
+        <button id="recognize-button">Recognize Face</button>
     </div>
     
     <div id="right-column">
-        <h2>Capture a new face</h2>
+        <h2>Capture a new face from Camera</h2>
+        <h3>Click the button below to capture a new face from the camera</h3>
+        <p>NOTE: This will only work if you are not in our database</p>
         <div class="video-container">
             <iframe id="video" src="/video_feed"></iframe>
         </div>
         <button id="capture-button">Capture</button>
-        <button id="recognize-button">Recognize Face</button>
     </div>
 
     <script>

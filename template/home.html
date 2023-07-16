@@ -3,18 +3,40 @@
 <head>
     <title>Face Recognition</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        #header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        #header img {
+            height: 60px;
+        }
+        #header h1 {
+            display: inline;
+            margin-left: 20px;
+            vertical-align: middle;
+        }
         #left-column {
             float: left;
             width: 25%;
+            padding: 20px;
         }
         #right-column {
             float: right;
-            width: 75%;
+            width: 65%;
+            padding: 20px;
         }
         .video-container {
             position: relative;
             width: 100%;
-            padding-top: 60%; /* This is for a 4:3 aspect ratio, adjust as needed */
+            padding-top: 60%;
             overflow: hidden;
         }
         #video {
@@ -24,10 +46,23 @@
             width: 100%;
             height: 100%;
         }
+        #footer {
+            clear: both;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 33.5%;
+            bottom: 0;
+        }
     </style>
 </head>
 <body>
-    <h1>Welcome to our Face Detection System for our University Attendance System.</h1>
+    <div id="header">
+        <img src="https://github.com/turhancan97/Intelligent-Face-Recognition-Attendance-System/assets/22428774/bb426a99-bd13-410d-a21c-e402850af561" alt="Logo">
+        <h1>Welcome to our Face Detection System for our University Attendance System</h1>
+    </div>
 
     <div id="left-column">
         <h2>Upload a new face as image</h2>
@@ -53,18 +88,24 @@
         <button id="capture-button">Capture</button>
     </div>
 
+    <div id="footer">
+        <p>Project by: Turhan Can Kargın</p>
+        <p>Powered by: Python, Flask, OpenCV, Firebase</p>
+    </div>
+
     <script>
         document.getElementById('recognize-button').addEventListener('click', function() {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/recognize', true);
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    // Redirect to the face recognition page
-                    window.location.href = '/face_recognition';
+                    // Redirect to the select class page
+                    window.location.href = '/select_class';
                 }
             };
             xhr.send();
         });
+
     </script>    
 
     <script>

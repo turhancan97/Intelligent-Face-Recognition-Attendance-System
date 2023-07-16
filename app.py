@@ -42,6 +42,7 @@ def upload_database(filename):
     return valid, error
 
 def match_with_database(img,database):
+    global match
     # Detect faces in the frame
     faces = detect_faces(img)
 
@@ -192,6 +193,7 @@ def submit_info():
     name = request.form.get('name')
     email = request.form.get('email')
     userType = request.form.get('userType')
+    classes = request.form.getlist('classes')  # Get all selected classes
     password = request.form.get('password')
 
     # Get the last uploaded image
@@ -218,6 +220,7 @@ def submit_info():
         'name': name,
         'email': email,
         'userType': userType,
+        'classes': classes,
         'password': password,
         'embeddings': embedding[0]['embedding']
         }
@@ -228,16 +231,16 @@ def submit_info():
 
     return redirect(url_for('success', filename=filename))
 
-@app.route('/recognize', methods=['POST'])
+@app.route('/recognize',methods=['GET', 'POST'])
 def recognize():
-    global detection
+    global detection, selected_class
     ret, frame = video.read()
     if ret:
         # Information to database
         ref = db.reference('Students')
         # Obtain the last studentId number from the database
         number_student = len(ref.get())
-        print('There are',number_student,'students in the database')
+        print('There are',(number_student-1),'students in the database')
 
         database = {}
         for i in range(1,number_student):
@@ -247,19 +250,38 @@ def recognize():
             database[studentName] = studentEmbedding
 
         detection = match_with_database(frame,database)
-        
 
     # Return a successful response
-    return redirect(url_for('face_recognition'))
+    return redirect(url_for('select_class'))
 
-@app.route('/face_recognition')
-def face_recognition():
-    # Generate the URL of the image
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
-    url = url_for('static', filename='recognized/recognized.png',v=timestamp)
 
-    # Render the template, passing the detection result and image URL
-    return f'<h2>Detection Result: {detection}</h2><img src="{url}" alt="Recognized face">'
+@app.route('/select_class', methods=['GET', 'POST'])
+def select_class():
+    if request.method == 'POST':
+        # Get the selected class from the form data
+        selected_class = request.form.get('classes')
+
+        # Generate the URL of the image
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
+        url = url_for('static', filename='recognized/recognized.png',v=timestamp)
+
+        # Information to database
+        ref = db.reference('Students')
+        # Obtain the last studentId number from the database
+        number_student = len(ref.get())
+
+        for i in range(1,number_student):
+            studentInfo = db.reference(f'Students/{i}').get()
+            if match == studentInfo['name']:
+                for class_ in studentInfo['classes']:
+                    if class_ == selected_class:
+                        # Render the template, passing the detection result and image URL
+                        return f'<h2>Selected Class: {selected_class} - {detection}</h2><img src="{url}" alt="Recognized face">'
+                    else:
+                        return f'<h2>Student not in class - {detection}</h2><img src="{url}" alt="Recognized face">'
+    else:
+        # Render the select class page
+        return render_template('select_class.html')
 
 def gen_frames():
     global video

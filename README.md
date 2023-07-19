@@ -12,12 +12,17 @@ This project is an excellent example of how computer vision and machine learning
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Features](#features)
+    - [Screenshots](#screenshots)
   - [Installation](#installation)
   - [Usage](#usage)
   - [Dependencies](#dependencies)
   - [Contribution](#contribution)
   - [Future Improvements](#future-improvements)
   - [License](#license)
+  - [Technical Information](#technical-information)
+    - [System Architecture Design](#system-architecture-design)
+    - [Database Design](#database-design)
+    - [Face Recognition System Development](#face-recognition-system-development)
 
 ## Introduction
 
@@ -51,6 +56,24 @@ The **Face Recognition Attendance System** comes with a host of features designe
 
 8. **Open Source**: The system is open source. Developers are welcome to contribute and help improve the system.
 
+### Screenshots
+
+<figure align="center"> 
+  <img src="docs/images/main_page.png" alt="drawing" height="400"/>
+  <figcaption>Home Page of the Interface</figcaption>
+</figure>
+
+<figure align="center"> 
+  <img src="docs/images/add_info.png" alt="drawing" height="400"/>
+  <figcaption>Page to add student's information to the database (After capture image/upload image)</figcaption>
+</figure>
+
+<figure align="center"> 
+  <img src="docs/images/attendance.png" alt="drawing" height="400"/>
+  <figcaption>Page after Teacher Login (Attendance list)</figcaption>
+</figure>
+
+
 ## Installation
 
 To get the Face Recognition Attendance System up and running on your local machine, follow these steps:
@@ -64,7 +87,7 @@ To get the Face Recognition Attendance System up and running on your local machi
 
 2. Create a virtual environment and activate it. You can do this by running the following commands in your terminal:
 
-   python environment
+   **python environment**   
    ```
    python -m venv your_env_name
    ```
@@ -75,7 +98,7 @@ To get the Face Recognition Attendance System up and running on your local machi
    
    or 
 
-   conda environment
+   **conda environment**
    ```
    conda create -n your_env_name
    ```
@@ -204,115 +227,79 @@ This project is licensed under the MIT License. This means you are free to use, 
 
 Please note that this project is provided "as is" without any warranty. The authors are not responsible for any damage or issues that may arise from using the project. Always check the code yourself before using it in a production environment.
 
-**Project Outline:**
-1. Project Introduction
-2. System Design and Development
-3. Testing and Evaluation
-4. Deployment and User Training
-5. Maintenance and Updates
+## Technical Information
 
-**Detailed Project Plan:**
+### System Architecture Design
 
-**Phase 1: Project Introduction**
-Tasks:
-- Define the project scope, objectives, and deliverables.
-- Identify the project requirements and constraints.
-- Set up a project timeline and milestones.
+Here's a high-level view of the system components and their interactions:
 
-**Phase 2: System Design and Development**
-Tasks:
-- **Task 1: Design System Architecture**
-  - Define the system components and their interactions.
-  - Design the database schema for Firebase.
-  - Design the user interface for the web application.
+<figure align="center"> 
+  <img src="docs/images/system_architecture_design.png" alt="drawing" width="600"/>
+  <figcaption>Diagram to visually represent the system architecture. </figcaption>
+</figure>
 
-- **Task 2: Develop Face Recognition System**
-  - Research and select appropriate face recognition algorithms.
-  - Implement the face recognition system using Python and OpenCV.
-  - Integrate the face recognition system with the Firebase database.
+**1. Face Recognition System:**
+This is the core of your project. It will capture images or video frames, detect faces, extract features, and match faces. This system will be developed using Python and OpenCV.
 
-- **Task 3: Develop User Interface**
-  - Implement the user interface for the web application.
-  - Ensure the interface is user-friendly and intuitive.
-  - Connect the user interface with the face recognition system and the Firebase database.
+**2. User Interface:**
+This is the part of the system that users (students and instructors) will interact with. It will display information from the Firebase database and send user inputs to the database. The interface will be developed as a web application using HTML, CSS, and JavaScript.
 
-**Phase 3: Testing and Evaluation**
-Tasks:
-- **Task 1: Unit Testing**
-  - Test each component of the system individually to ensure it functions as expected.
+**3. Firebase Database:**
+This is where all the necessary data will be stored. The database will store student information, attendance records, and any other necessary data. The face recognition system and the user interface will both interact with the database to store and retrieve data.
 
-- **Task 2: Integration Testing**
-  - Test the system as a whole to ensure all components work together seamlessly.
+**Interactions:**
 
-- **Task 3: User Acceptance Testing**
-  - Have a small group of end-users test the system and provide feedback.
+- The **Face Recognition System** will capture images or video frames from the user's camera, detect faces, extract features, and match faces. When a face is matched, the system will send the student's ID and the current date and time to the Firebase Database to record the attendance.
 
-**Phase 4: Deployment and User Training**
-Tasks:
-- **Task 1: Deployment**
-  - Deploy the system for use in the intended environment.
+- The **User Interface** will display the attendance records from the Firebase Database. When a student or instructor logs in, the interface will send their ID to the Firebase Database to retrieve their attendance records. The interface will also provide options for students to register for classes and for instructors to create classes, and these actions will also involve sending data to the Firebase Database.
 
-- **Task 2: User Training**
-  - Conduct training sessions for users to ensure they understand how to use the system.
+- The **Firebase Database** will store all the data for the system. When it receives data from the Face Recognition System or the User Interface, it will update the relevant records. When it receives a request for data from the User Interface, it will retrieve the requested records and send them to the interface.
 
-**Phase 5: Maintenance and Updates**
-Tasks:
-- **Task 1: System Maintenance**
-  - Regularly monitor the system for any issues or bugs.
+This is a simplified view of the system architecture and the interactions between the components. Depending on the specific requirements of your project, you may need to add more components or interactions. For example, you might need to add a component for handling user authentication if you want to ensure that only registered students and instructors can access the system.docs/images/database_design.png
 
-- **Task 2: System Updates**
-  - Regularly update the system based on user feedback and technological advancements.
+### Database Design
 
----
+Let's now design and draw the database schema for Firebase. This includes defining the data that will be stored (e.g., student information, attendance records, etc.) and how this data will be structured and related. 
 
-**Project Introduction**
+<figure align="center"> 
+  <img src="docs/images/database_design.png" alt="drawing" height="400"/>
+  <figcaption>Database schema for Firebase </figcaption>
+</figure>
 
-1. **Project Overview**
-   - Briefly describe the project, its objectives, and its expected outcomes. Explain the problem that the project aims to solve and how the proposed system, the 'Intelligent Face Recognition Attendance System', will address this problem.
+1. **Users Collection:** This collection will store information about all users, including both students and instructors. Each user will have a unique ID, and the data stored for each user might include:
 
-2. **Project Scope**
-   - Define the boundaries of the project. What will the project include and what will it not include? For example, the project will include the development of a face recognition system and a user interface, but it will not include the development of hardware components as it will utilize existing systems.
+   - `userID`: A unique identifier for the user.
+   - `name`: The user's full name.
+   - `email`: The user's email address.
+   - `embeddings`: user face embeddings
+   - `userType`: The type of user (student or instructor).
+   - `password`: The user's password (stored securely).
+   - `classes`: List of programs in which the user is enrolled (for students) and the number of attendance of that student
 
-3. **Project Objectives**
-   - Clearly state what the project aims to achieve. The main objective of this project is to develop an Intelligent Face Recognition Attendance System that uses digital images or video frames to automatically identify and verify the identification of an individual for attendance purposes.
+This is a simplified view of the structure of our database. We also stored the images of the student in the Firebase Storage. The images are stored in a folder named static/images and name of the images are the student's ID.
 
-4. **Project Deliverables**
-   - List the tangible items or results that will be delivered to the client at the end of the project. This could include the face recognition system, the user interface, user manuals, etc.
+### Face Recognition System Development
 
-5. **Project Requirements**
-   - Identify the specific requirements that the project must meet. This could include technical requirements (e.g., the system must be able to accurately recognize faces in different lighting conditions), user requirements (e.g., the system must be user-friendly and easy to use), and legal requirements (e.g., the system must comply with data privacy laws).
+This is a crucial part of your project and involves several steps:
 
-6. **Project Constraints**
-   - Identify any limitations or restrictions that could impact the project. This could include budget constraints, time constraints, resource constraints, etc.
+<figure align="center"> 
+  <img src="docs/images/face_detection_diagram.png" alt="drawing" width="400"/>
+  <figcaption>Face Recognition System Flow</figcaption>
+</figure>
 
-7. **Project Timeline and Milestones**
-   - Provide an estimated timeline for the project, including key milestones. The timeline should provide a high-level view of when each phase of the project (e.g., system design and development, testing and evaluation, deployment and user training, etc.) is expected to start and finish.
+1. **Research Face Recognition Algorithms:**
+   - We start by researching various face recognition algorithms. There are many available, each with its own strengths and weaknesses. Some popular choices include Eigenfaces, Fisherfaces, Local Binary Patterns Histograms (LBPH), and deep learning-based methods.
+   - We consider factors such as simplicity, accuracy, computational complexity, and robustness to variations in lighting, pose, and facial expression when choosing an algorithm.
 
-This section sets the foundation for the project and provides a clear understanding of what the project will entail. It's important to ensure that all stakeholders are on the same page regarding the project's scope, objectives, deliverables, requirements, constraints, and timeline.
+2. **Implement Face Recognition System:**
+   - Once you've chosen an algorithm, the next step is to implement it using Python and OpenCV. This will involve several sub-steps:
+     - **Face Detection:** Before you can recognize a face, you need to detect it. OpenCV provides pre-trained classifiers. We used the Haar Cascade Classifier for face detection.
+     - **Face Alignment:** Faces in the input images might be tilted or turned, which can reduce the accuracy of your face recognition algorithm. To correct this, we use an alignment algorithm to align the detected faces. This typically involves rotating and scaling the face so that the eyes and mouth are in fixed positions.
+     - **Feature Extraction:** This involves extracting features from the aligned faces that can be used to distinguish different individuals. We used DeepFace method to calculate the face embeddings with the help of FaceNet model.
+     - **Face Matching:** This involves comparing the extracted features to a database of known faces and finding the best match. This basically involves calculating a distance or similarity measure between the feature vectors. The face in the database that has the smallest distance or highest similarity to the input face is considered the best match. Output the ID of the matched face (FACE_ID).
 
----
-
-**System Design and Development**
-
-1. **System Architecture Design**
-   - Define the system components and their interactions. This includes the face recognition system, the user interface, and the Firebase database. Create a diagram to visually represent the system architecture.
-
-2. **Database Design**
-   - Design the database schema for Firebase. This includes defining the data that will be stored (e.g., student information, attendance records, etc.) and how this data will be structured and related.
-
-3. **User Interface Design**
-   - Design the user interface for the web application. This includes defining the layout, colors, fonts, and images that will be used. The interface should be user-friendly and intuitive.
-
-4. **Face Recognition System Development**
-   - Research and select appropriate face recognition algorithms. This could include algorithms for face detection, feature extraction, and face matching.
-   - Implement the face recognition system using Python and OpenCV. This includes writing the code to capture images or video frames, detect faces, extract features, and match faces.
-   - Integrate the face recognition system with the Firebase database. This includes writing the code to store and retrieve data from the database.
-
-5. **User Interface Development**
-   - Implement the user interface for the web application. This includes writing the HTML, CSS, and JavaScript code to create the interface based on the design.
-   - Connect the user interface with the face recognition system and the Firebase database. This includes writing the code to display data from the database on the interface and to send data from the interface to the database.
-
-6. **System Integration**
-   - Integrate all components of the system to ensure they work together seamlessly. This includes ensuring that the face recognition system, the user interface, and the Firebase database can communicate with each other effectively.
-
-This section involves a lot of technical work and requires a good understanding of Python, OpenCV, Firebase, and web development. It's important to test each component as it's developed to catch any issues early and ensure that the final system functions as expected.
+3. **Integrate Face Recognition System with Firebase Database:**
+   - Once your face recognition system is working, the next step is to integrate it with your Firebase database. This will involve several sub-steps:
+     - When a face is detected and recognized, the system should send the student's ID and the current date and time to the Firebase Database to record the attendance.
+     - The system should also be able to retrieve student information and face data from the Firebase Database for the face matching process.
+     - The system should also be able to retrieve attendance records from the Firebase Database for display in the user interface.

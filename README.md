@@ -73,6 +73,15 @@ The **Face Recognition Attendance System** comes with a host of features designe
   <figcaption>Page after Teacher Login (Attendance list)</figcaption>
 </figure>
 
+<figure align="center"> 
+  <img src="docs/images/after_attendance.png" alt="drawing" height="400"/>
+  <figcaption>Page after attending the class</figcaption>
+</figure>
+
+<figure align="center"> 
+  <img src="docs/images/choose_class.png" alt="drawing" height="400"/>
+  <figcaption>Choosing a Class to Attend</figcaption>
+</figure>
 
 ## Installation
 

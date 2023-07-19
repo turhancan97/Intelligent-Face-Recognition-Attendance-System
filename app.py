@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, Response
+from flask import Flask, render_template, request, redirect, url_for, Response, flash
+from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import os
 import cv2
@@ -11,6 +12,13 @@ from firebase_admin import credentials
 from firebase_admin import db
 from firebase_admin import storage
 from detection.face_matching import *
+
+# pasword: 123456
+TEACHER_PASSWORD_HASH = 'pbkdf2:sha256:260000$J9j8FXglBKfe89jl$fcf47f52f139675617e43a2457a00dbf92fcdbe7cf494edefab0ed5562debd3c'
+
+# # Generate a password hash
+# from werkzeug.security import generate_password_hash
+# print(generate_password_hash('your_password'))
 
  # Initialize Firebase
 cred = credentials.Certificate("database/serviceAccountKey.json")
@@ -75,6 +83,7 @@ def match_with_database(img,database):
         # break # TODO: remove this line to detect all faces in the frame
 
 app = Flask(__name__, template_folder='template')
+app.secret_key = '123456'  # Add this line
 
 # Specify the directory to save uploaded images
 UPLOAD_FOLDER = 'static/images'
@@ -87,6 +96,27 @@ def home():
 @app.route('/add_info')
 def add_info():
     return render_template('add_info.html')
+
+@app.route('/teacher_login', methods=['GET', 'POST'])
+def teacher_login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if check_password_hash(TEACHER_PASSWORD_HASH, password):
+            return redirect(url_for('attendance'))
+        else:
+            flash('Incorrect password')
+    return render_template('teacher_login.html')
+
+@app.route('/attendance')
+def attendance():
+    ref = db.reference('Students')
+    number_student = len(ref.get())
+    # attandence
+    students = {}
+    for i in range(1,number_student):
+        studentInfo = db.reference(f'Students/{i}').get()
+        students[i] = [studentInfo['name'], studentInfo['email'], studentInfo['userType'], studentInfo['classes']]
+    return render_template('attendance.html', students=students)
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -220,7 +250,7 @@ def submit_info():
         'name': name,
         'email': email,
         'userType': userType,
-        'classes': classes,
+        'classes': {class_:'0' for class_ in classes},
         'password': password,
         'embeddings': embedding[0]['embedding']
         }
@@ -233,7 +263,7 @@ def submit_info():
 
 @app.route('/recognize',methods=['GET', 'POST'])
 def recognize():
-    global detection, selected_class
+    global detection
     ret, frame = video.read()
     if ret:
         # Information to database
@@ -273,12 +303,15 @@ def select_class():
         for i in range(1,number_student):
             studentInfo = db.reference(f'Students/{i}').get()
             if match == studentInfo['name']:
-                for class_ in studentInfo['classes']:
-                    if class_ == selected_class:
-                        # Render the template, passing the detection result and image URL
-                        return f'<h2>Selected Class: {selected_class} - {detection}</h2><img src="{url}" alt="Recognized face">'
-                    else:
-                        return f'<h2>Student not in class - {detection}</h2><img src="{url}" alt="Recognized face">'
+                # Check if the selceted class is in the list of studentInfo['classes']
+                print(studentInfo['classes'])
+                if selected_class in studentInfo['classes']:
+                    # Update the attendance in the database
+                    ref.child(f"{i}/classes/{selected_class}").set(studentInfo.get('classes', {}).get(selected_class) + 1)
+                    # Render the template, passing the detection result and image URL
+                    return f'<h2>Selected Class: {selected_class} - {detection}</h2><img src="{url}" alt="Recognized face">'
+                else:
+                    return f'<h2>Student not in class - {detection}</h2><img src="{url}" alt="Recognized face">'
     else:
         # Render the select class page
         return render_template('select_class.html')

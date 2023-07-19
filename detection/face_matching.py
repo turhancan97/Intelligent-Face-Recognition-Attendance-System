@@ -2,14 +2,17 @@ import cv2
 import dlib
 import numpy as np
 from deepface import DeepFace
+
 # import tensorflow as tf
 from scipy.spatial.distance import cosine
 
 # Path to the shape predictor file
-datFile =  "/Users/turhancan97/Library/CloudStorage/OneDrive-AnadoluÜniversitesi-AÖF/Side Projetcs/Others/Güncel Projeler/Face_Recognition_App/Intelligent-Face-Recognition-Attendance-System/detection/shape_predictor_68_face_landmarks.dat"
+datFile = "/Users/turhancan97/Library/CloudStorage/OneDrive-AnadoluÜniversitesi-AÖF/Side Projetcs/Others/Güncel Projeler/Face_Recognition_App/Intelligent-Face-Recognition-Attendance-System/detection/shape_predictor_68_face_landmarks.dat"
 
 # Load the cascade
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
 
 # Load the detector and predictor
 detector = dlib.get_frontal_face_detector()
@@ -18,25 +21,33 @@ predictor = dlib.shape_predictor(datFile)
 # # Load the model
 # model = tf.keras.applications.ResNet50(weights='imagenet')
 
+
 def detect_faces(img):
     # Convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # Display the frame
 
     # Detect faces
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    faces = face_cascade.detectMultiScale(
+        gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+    )
 
     # Return the list of faces
     return faces
+
 
 def align_face(img, face):
     # Convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Detect facial landmarks
-    rect = dlib.rectangle(int(face[0]), int(face[1]), int(face[0] + face[2]), int(face[1] + face[3]))
+    rect = dlib.rectangle(
+        int(face[0]), int(face[1]), int(face[0] + face[2]), int(face[1] + face[3])
+    )
     shape = predictor(gray, rect)
-    shape = np.array([(shape.part(j).x, shape.part(j).y) for j in range(shape.num_parts)])
+    shape = np.array(
+        [(shape.part(j).x, shape.part(j).y) for j in range(shape.num_parts)]
+    )
 
     # Specify the size of the aligned face image
     desired_face_width = 256
@@ -56,13 +67,17 @@ def align_face(img, face):
     angle = np.degrees(np.arctan2(dY, dX))
 
     # Calculate the scale of the new resulting image by taking the ratio of the distance between eyes in the current image to the ratio of distance between eyes in the desired image
-    dist = np.sqrt((dX ** 2) + (dY ** 2))
-    desired_dist = desired_face_width * 0.27  # The desired distance is set to be approximately 27% of the face width
+    dist = np.sqrt((dX**2) + (dY**2))
+    desired_dist = (
+        desired_face_width * 0.27
+    )  # The desired distance is set to be approximately 27% of the face width
     scale = desired_dist / dist
 
     # Calculate the center of the eyes
-    eyes_center = (int((left_eye_center[0] + right_eye_center[0]) // 2), int((left_eye_center[1] + right_eye_center[1]) // 2))
-
+    eyes_center = (
+        int((left_eye_center[0] + right_eye_center[0]) // 2),
+        int((left_eye_center[1] + right_eye_center[1]) // 2),
+    )
 
     # Get the rotation matrix for rotating and scaling the face
     M = cv2.getRotationMatrix2D(eyes_center, angle, scale)
@@ -70,8 +85,8 @@ def align_face(img, face):
     # Update the translation component of the matrix
     tX = desired_face_width * 0.5
     tY = desired_face_height * 0.3
-    M[0, 2] += (tX - eyes_center[0])
-    M[1, 2] += (tY - eyes_center[1])
+    M[0, 2] += tX - eyes_center[0]
+    M[1, 2] += tY - eyes_center[1]
 
     # Apply the affine transformation
     (w, h) = (desired_face_width, desired_face_height)
@@ -100,14 +115,16 @@ def align_face(img, face):
 
 #     return yhat[0]
 
+
 def extract_features(face):
     # Convert the face to RGB color format
     face_rgb = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
 
     # Use the DeepFace model to predict the embedding
-    embedding = DeepFace.represent(face_rgb, model_name='Facenet')
+    embedding = DeepFace.represent(face_rgb, model_name="Facenet")
 
     return embedding
+
 
 def match_face(embedding, database):
     min_distance = 100  # Initialize min_distance with a large number

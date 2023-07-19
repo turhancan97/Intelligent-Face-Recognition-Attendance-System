@@ -1,6 +1,4 @@
 .DS_Store
 __pycache__
 database
-examples
-*.png
 shape_predictor_68_face_landmarks.dat

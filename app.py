@@ -14,34 +14,38 @@ from firebase_admin import storage
 from detection.face_matching import *
 
 # pasword: 123456
-TEACHER_PASSWORD_HASH = 'pbkdf2:sha256:260000$J9j8FXglBKfe89jl$fcf47f52f139675617e43a2457a00dbf92fcdbe7cf494edefab0ed5562debd3c'
+TEACHER_PASSWORD_HASH = "pbkdf2:sha256:260000$J9j8FXglBKfe89jl$fcf47f52f139675617e43a2457a00dbf92fcdbe7cf494edefab0ed5562debd3c"
 
 # # Generate a password hash
 # from werkzeug.security import generate_password_hash
 # print(generate_password_hash('your_password'))
 
- # Initialize Firebase
+# Initialize Firebase
 cred = credentials.Certificate("database/serviceAccountKey.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://face-recognition-486cb-default-rtdb.firebaseio.com/',
-    'storageBucket': 'face-recognition-486cb.appspot.com'
-    })
+firebase_admin.initialize_app(
+    cred,
+    {
+        "databaseURL": "https://face-recognition-486cb-default-rtdb.firebaseio.com/",
+        "storageBucket": "face-recognition-486cb.appspot.com",
+    },
+)
+
 
 def upload_database(filename):
     valid = False
     # If the fileName exists in the database storage, then continue
     if storage.bucket().get_blob(filename):
         valid = True
-        error =  f'<h1>{filename} already exists in the database</h1>'
-    
+        error = f"<h1>{filename} already exists in the database</h1>"
+
     # First check if the name of the file is a number
     if not filename[:-4].isdigit():
         valid = True
-        error = f'<h1>Please make sure that the name of the {filename} is a number</h1>'
+        error = f"<h1>Please make sure that the name of the {filename} is a number</h1>"
 
     if not valid:
         # Image to database
-        filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        filename = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         bucket = storage.bucket()
         blob = bucket.blob(filename)
         blob.upload_from_filename(filename)
@@ -49,17 +53,18 @@ def upload_database(filename):
 
     return valid, error
 
-def match_with_database(img,database):
+
+def match_with_database(img, database):
     global match
     # Detect faces in the frame
     faces = detect_faces(img)
 
     # Draw the rectangle around each face
-    for (x, y, w, h) in faces:
-        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 4)
-    
-    # save the image 
-    cv2.imwrite('static/recognized/recognized.png', img)
+    for x, y, w, h in faces:
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 4)
+
+    # save the image
+    cv2.imwrite("static/recognized/recognized.png", img)
 
     for face in faces:
         try:
@@ -69,166 +74,180 @@ def match_with_database(img,database):
             # Extract features from the face
             embedding = extract_features(aligned_face)
 
-            embedding = embedding[0]['embedding']
+            embedding = embedding[0]["embedding"]
 
             # Match the face to a face in the database
-            match = match_face(embedding,database)
+            match = match_face(embedding, database)
 
             if match is not None:
-                return f'Match found: {match}'
+                return f"Match found: {match}"
             else:
-                return 'No match found'
+                return "No match found"
         except:
-            return 'No face detected'
+            return "No face detected"
         # break # TODO: remove this line to detect all faces in the frame
 
-app = Flask(__name__, template_folder='template')
-app.secret_key = '123456'  # Add this line
+
+app = Flask(__name__, template_folder="template")
+app.secret_key = "123456"  # Add this line
 
 # Specify the directory to save uploaded images
-UPLOAD_FOLDER = 'static/images'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOAD_FOLDER = "static/images"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-@app.route('/')
+
+@app.route("/")
 def home():
-    return render_template('home.html')
+    return render_template("home.html")
 
-@app.route('/add_info')
+
+@app.route("/add_info")
 def add_info():
-    return render_template('add_info.html')
+    return render_template("add_info.html")
 
-@app.route('/teacher_login', methods=['GET', 'POST'])
+
+@app.route("/teacher_login", methods=["GET", "POST"])
 def teacher_login():
-    if request.method == 'POST':
-        password = request.form.get('password')
+    if request.method == "POST":
+        password = request.form.get("password")
         if check_password_hash(TEACHER_PASSWORD_HASH, password):
-            return redirect(url_for('attendance'))
+            return redirect(url_for("attendance"))
         else:
-            flash('Incorrect password')
-    return render_template('teacher_login.html')
+            flash("Incorrect password")
+    return render_template("teacher_login.html")
 
-@app.route('/attendance')
+
+@app.route("/attendance")
 def attendance():
-    ref = db.reference('Students')
+    ref = db.reference("Students")
     number_student = len(ref.get())
     # attandence
     students = {}
-    for i in range(1,number_student):
-        studentInfo = db.reference(f'Students/{i}').get()
-        students[i] = [studentInfo['name'], studentInfo['email'], studentInfo['userType'], studentInfo['classes']]
-    return render_template('attendance.html', students=students)
+    for i in range(1, number_student):
+        studentInfo = db.reference(f"Students/{i}").get()
+        students[i] = [
+            studentInfo["name"],
+            studentInfo["email"],
+            studentInfo["userType"],
+            studentInfo["classes"],
+        ]
+    return render_template("attendance.html", students=students)
 
-@app.route('/upload', methods=['POST'])
+
+@app.route("/upload", methods=["POST"])
 def upload():
     global filename
     # Check if a file was uploaded
-    if 'file' not in request.files:
-        return 'No file uploaded', 400
+    if "file" not in request.files:
+        return "No file uploaded", 400
 
-    file = request.files['file']
+    file = request.files["file"]
 
     # Check if the file is one of the allowed types/extensions
-    if file.filename == '':
-        return 'No selected file', 400
+    if file.filename == "":
+        return "No selected file", 400
 
     if file and allowed_file(file.filename):
         # Make the filename safe, remove unsupported chars
         filename = secure_filename(file.filename)
         # change the name of the file to the studentId
         # Information to database
-        ref = db.reference('Students')
+        ref = db.reference("Students")
         try:
             # Obtain the last studentId number from the database
             studentId = len(ref.get())
         except TypeError:
             studentId = 1
 
-        filename = f'{studentId}.png'
+        filename = f"{studentId}.png"
 
         # Move the file from the temporal folder to
         # the upload folder we setup
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         # Upload the file to the database
-        val,err = upload_database(filename)
+        val, err = upload_database(filename)
 
         if val:
             return err
-        
+
         # Redirect the user to the uploaded_file route, which
         # will basically show on the browser the uploaded file
-        return redirect(url_for('add_info'))
+        return redirect(url_for("add_info"))
 
-    return 'File upload failed', 400
+    return "File upload failed", 400
+
 
 def allowed_file(filename):
     # Put your allowed file types here
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/uploads/<filename>')
+@app.route("/uploads/<filename>")
 def uploaded_file(filename):
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  # for browser cache
     # Generate the URL of the image
-    url = url_for('static', filename='images/' + filename,v=timestamp)
+    url = url_for("static", filename="images/" + filename, v=timestamp)
     # Return an HTML string that includes an <img> tag
     return f'<h1>File uploaded successfully</h1><img src="{url}" alt="Uploaded image">'
 
 
-@app.route('/video_feed')
+@app.route("/video_feed")
 def video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
-@app.route('/capture', methods=['POST'])
+
+@app.route("/capture", methods=["POST"])
 def capture():
     global filename
     ret, frame = video.read()
     if ret:
         # Information to database
-        ref = db.reference('Students')
-        
+        ref = db.reference("Students")
+
         try:
             # Obtain the last studentId number from the database
             studentId = len(ref.get())
-        
+
         except TypeError:
             studentId = 1
 
         # Save the image
-        filename = f'{studentId}.png'
+        filename = f"{studentId}.png"
         # Save the frame as an image
-        cv2.imwrite(os.path.join(app.config['UPLOAD_FOLDER'], filename), frame)
+        cv2.imwrite(os.path.join(app.config["UPLOAD_FOLDER"], filename), frame)
 
         # Upload the file to the database
-        val,err = upload_database(filename)
+        val, err = upload_database(filename)
 
         if val:
             return err
     # Redirect to the success page
-    return redirect(url_for('add_info'))
+    return redirect(url_for("add_info"))
 
-@app.route('/success/<filename>')
+
+@app.route("/success/<filename>")
 def success(filename):
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  # for browser cache
     # Generate the URL of the image
-    url = url_for('static', filename='images/' + filename,v=timestamp)
+    url = url_for("static", filename="images/" + filename, v=timestamp)
     # Return an HTML string that includes an <img> tag
     return f'<h1>{filename} image uploaded successfully to the database</h1><img src="{url}" alt="Uploaded image">'
 
-@app.route('/submit_info', methods=['POST'])
+
+@app.route("/submit_info", methods=["POST"])
 def submit_info():
     # Get the form data
-    name = request.form.get('name')
-    email = request.form.get('email')
-    userType = request.form.get('userType')
-    classes = request.form.getlist('classes')  # Get all selected classes
-    password = request.form.get('password')
+    name = request.form.get("name")
+    email = request.form.get("email")
+    userType = request.form.get("userType")
+    classes = request.form.getlist("classes")  # Get all selected classes
+    password = request.form.get("password")
 
     # Get the last uploaded image
     studentId, _ = os.path.splitext(filename)
-    fileName = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    fileName = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     data = cv2.imread(fileName)
 
     # Detect faces in the image
@@ -243,78 +262,81 @@ def submit_info():
         break
 
     # Add the information to the database
-    ref = db.reference('Students')
+    ref = db.reference("Students")
     data = {
-        str(studentId) : 
-        {
-        'name': name,
-        'email': email,
-        'userType': userType,
-        'classes': {class_:'0' for class_ in classes},
-        'password': password,
-        'embeddings': embedding[0]['embedding']
+        str(studentId): {
+            "name": name,
+            "email": email,
+            "userType": userType,
+            "classes": {class_: int("0") for class_ in classes},
+            "password": password,
+            "embeddings": embedding[0]["embedding"],
         }
     }
-    
+
     for key, value in data.items():
         ref.child(key).set(value)
 
-    return redirect(url_for('success', filename=filename))
+    return redirect(url_for("success", filename=filename))
 
-@app.route('/recognize',methods=['GET', 'POST'])
+
+@app.route("/recognize", methods=["GET", "POST"])
 def recognize():
     global detection
     ret, frame = video.read()
     if ret:
         # Information to database
-        ref = db.reference('Students')
+        ref = db.reference("Students")
         # Obtain the last studentId number from the database
         number_student = len(ref.get())
-        print('There are',(number_student-1),'students in the database')
+        print("There are", (number_student - 1), "students in the database")
 
         database = {}
-        for i in range(1,number_student):
-            studentInfo = db.reference(f'Students/{i}').get()
-            studentName = studentInfo['name']
-            studentEmbedding = studentInfo['embeddings']
+        for i in range(1, number_student):
+            studentInfo = db.reference(f"Students/{i}").get()
+            studentName = studentInfo["name"]
+            studentEmbedding = studentInfo["embeddings"]
             database[studentName] = studentEmbedding
 
-        detection = match_with_database(frame,database)
+        detection = match_with_database(frame, database)
 
     # Return a successful response
-    return redirect(url_for('select_class'))
+    return redirect(url_for("select_class"))
 
 
-@app.route('/select_class', methods=['GET', 'POST'])
+@app.route("/select_class", methods=["GET", "POST"])
 def select_class():
-    if request.method == 'POST':
+    if request.method == "POST":
         # Get the selected class from the form data
-        selected_class = request.form.get('classes')
+        selected_class = request.form.get("classes")
 
         # Generate the URL of the image
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S") # for browser cache
-        url = url_for('static', filename='recognized/recognized.png',v=timestamp)
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  # for browser cache
+        url = url_for("static", filename="recognized/recognized.png", v=timestamp)
 
         # Information to database
-        ref = db.reference('Students')
+        ref = db.reference("Students")
         # Obtain the last studentId number from the database
         number_student = len(ref.get())
 
-        for i in range(1,number_student):
-            studentInfo = db.reference(f'Students/{i}').get()
-            if match == studentInfo['name']:
+        for i in range(1, number_student):
+            studentInfo = db.reference(f"Students/{i}").get()
+            if match == studentInfo["name"]:
                 # Check if the selceted class is in the list of studentInfo['classes']
-                print(studentInfo['classes'])
-                if selected_class in studentInfo['classes']:
+                print(studentInfo["classes"])
+                if selected_class in studentInfo["classes"]:
                     # Update the attendance in the database
-                    ref.child(f"{i}/classes/{selected_class}").set(studentInfo.get('classes', {}).get(selected_class) + 1)
+                    ref.child(f"{i}/classes/{selected_class}").set(
+                        int(studentInfo.get("classes", {}).get(selected_class)) + 1
+                    )
                     # Render the template, passing the detection result and image URL
                     return f'<h2>Selected Class: {selected_class} - {detection}</h2><img src="{url}" alt="Recognized face">'
                 else:
                     return f'<h2>Student not in class - {detection}</h2><img src="{url}" alt="Recognized face">'
     else:
         # Render the select class page
-        return render_template('select_class.html')
+        return render_template("select_class.html")
+
 
 def gen_frames():
     global video
@@ -324,10 +346,10 @@ def gen_frames():
         if not success:
             break
         else:
-            ret, buffer = cv2.imencode('.jpg', frame)
+            ret, buffer = cv2.imencode(".jpg", frame)
             frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)

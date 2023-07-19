@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../")
+
 import cv2
 from detection.face_matching import *
 
@@ -43,7 +46,7 @@ def match_with_database(img, database):
     cv2.destroyAllWindows()
 
 
-cred = credentials.Certificate("database/serviceAccountKey.json")
+cred = credentials.Certificate("../database/serviceAccountKey.json")
 firebase_admin.initialize_app(
     cred,
     {
@@ -106,5 +109,5 @@ if camera_or_image == "1":
 
 elif camera_or_image == "2":
     # Read the image, TODO: this will come from the webcam later
-    img = cv2.imread("examples/face1.png")
+    img = cv2.imread("../examples/face1.png")
     faces = match_with_database(img, database)

@@ -1,37 +1,39 @@
-from flask import Flask, render_template, request, redirect, url_for, Response, flash
+from flask import Flask, render_template
+from flask import request, redirect, url_for, Response, flash
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import os
 import cv2
-import numpy as np
-import io
-from PIL import Image
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 from firebase_admin import storage
-from detection.face_matching import *
+from detection.face_matching import detect_faces, align_face
+from detection.face_matching import extract_features, match_face
+from utils.configuration import load_yaml
 
-# pasword: 123456
-TEACHER_PASSWORD_HASH = "pbkdf2:sha256:260000$J9j8FXglBKfe89jl$fcf47f52f139675617e43a2457a00dbf92fcdbe7cf494edefab0ed5562debd3c"
+config_file_path = load_yaml("configs/database.yaml")
 
-# # Generate a password hash
-# from werkzeug.security import generate_password_hash
-# print(generate_password_hash('your_password'))
+TEACHER_PASSWORD_HASH = config_file_path["teacher"]["password_hash"]
+print(TEACHER_PASSWORD_HASH)
 
 # Initialize Firebase
-cred = credentials.Certificate("database/serviceAccountKey.json")
+cred = credentials.Certificate(config_file_path["firebase"]["pathToServiceAccount"])
 firebase_admin.initialize_app(
     cred,
     {
-        "databaseURL": "https://face-recognition-486cb-default-rtdb.firebaseio.com/",
-        "storageBucket": "face-recognition-486cb.appspot.com",
+        "databaseURL": config_file_path["firebase"]["databaseURL"],
+        "storageBucket": config_file_path["firebase"]["storageBucket"],
     },
 )
 
 
 def upload_database(filename):
+    """
+    Checks if a file with the given filename already exists in the
+    database storage, and if not, uploads the file to the database.
+    """
     valid = False
     # If the fileName exists in the database storage, then continue
     if storage.bucket().get_blob(filename):
@@ -55,6 +57,9 @@ def upload_database(filename):
 
 
 def match_with_database(img, database):
+    '''The function "match_with_database" takes an image and a database as input, detects faces in the
+    image, aligns and extracts features from each face, and matches the face to a face in the database.
+    '''
     global match
     # Detect faces in the frame
     faces = detect_faces(img)

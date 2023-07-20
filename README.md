@@ -126,6 +126,10 @@ This will create a virtual environment and activate it. All the dependencies wil
 
    This command will install all the necessary libraries and packages listed in the `requirements.txt` file.
 
+   Please note that you need to download the shape predictor file 'shape_predictor_68_face_landmarks.dat' from the dlib website. You can download the file from [here](https://github.com/italojs/facial-landmarks-recognition/blob/master/shape_predictor_68_face_landmarks.dat). You can put the file in the detection folder and you need to write full path of the file in the face_matching.py file for the **datFile** variable as below.
+
+   ![datfile](docs/images/datfile.png)
+
 4. **Set Up Firebase**: The system uses Firebase for database operations. You need to set up a Firebase project and replace the Firebase configuration in the project with your own. You can follow the [Firebase setup guide](https://firebase.google.com/docs/web/setup) for instructions.
    1. First you need to create a project in Firebase.
   ![Firebase Project](docs/images/create_project.png)
@@ -134,6 +138,8 @@ This will create a virtual environment and activate it. All the dependencies wil
    1. Copy your database URL and paste it to the configs/database.yaml file into enter-your-databaseURL section. Example: https://abcd-6ccf7-default-rtdb.firebaseio.com/
    2. Now, start storage in test mode.
    3. Copy the folder path without 'gs://' part and paste it to.the configs/database.yaml file into enter-your-storageBucket section. Example: abcd-6ccf7.appspot.com
+   4. Finally you need to create a service account key as json file. You can do it via project settings on Firebase project. Then copy the path of the json file and paste it to the configs/database.yaml file into enter-your-serviceAccountKey-path section. Example: /home/your_user_name/Downloads/serviceAccountKey.json
+  ![Firebase Service Account Key](docs/images/json_file.png)
 
 1. **Run the Application**: First run the command below and enter a password for teacher login.
 

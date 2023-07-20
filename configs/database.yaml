@@ -3,3 +3,4 @@ teacher:
 firebase:
   databaseURL: <enter-your-databaseURL>
   storageBucket: <enter-your-storageBucket>
+  pathToServiceAccount: <enter-your-serviceAccountKey-path>

@@ -98,7 +98,7 @@ To get the Face Recognition Attendance System up and running on your local machi
 
    **python environment**   
    ```
-   python -m venv your_env_name
+   python3.8 -m venv your_env_name
    ```
 
    ```
@@ -109,7 +109,7 @@ To get the Face Recognition Attendance System up and running on your local machi
 
    **conda environment**
    ```
-   conda create -n your_env_name
+   conda create -n your_env_name python=3.8
    ```
 
    ```
@@ -127,14 +127,29 @@ This will create a virtual environment and activate it. All the dependencies wil
    This command will install all the necessary libraries and packages listed in the `requirements.txt` file.
 
 4. **Set Up Firebase**: The system uses Firebase for database operations. You need to set up a Firebase project and replace the Firebase configuration in the project with your own. You can follow the [Firebase setup guide](https://firebase.google.com/docs/web/setup) for instructions.
+   1. First you need to create a project in Firebase.
+  ![Firebase Project](docs/images/create_project.png)
+   1. Later, you need to create Realtime Database (Start in test mode).
+  ![Firebase Realtime Database](docs/images/create_database.png)
+   1. Copy your database URL and paste it to the configs/database.yaml file into enter-your-databaseURL section. Example: https://abcd-6ccf7-default-rtdb.firebaseio.com/
+   2. Now, start storage in test mode.
+   3. Copy the folder path without 'gs://' part and paste it to.the configs/database.yaml file into enter-your-storageBucket section. Example: abcd-6ccf7.appspot.com
 
-5. **Run the Application**: Once all the setup is complete, you can run the application by executing the following command in the terminal:
+1. **Run the Application**: First run the command below and enter a password for teacher login.
 
+   ```
+   python generate_password_hash.py
+   ```
+
+Then copy the has to the configs/database.yaml file into enter-your-teacher-login-hash section.
+
+Once all the setup is complete, you can run the application by executing the following command in the terminal:
+  
    ```
    python app.py
    ```
 
-   This will start the Flask server and the application will be accessible at `http://localhost:5000`.
+   This will start the Flask server and the application will be accessible at `http://127.0.0.1:5000/`.
 
 Please note that you need a webcam connected to your machine for the face recognition feature to work. If you are using a laptop, the built-in webcam will work fine.
 
@@ -142,7 +157,7 @@ Please note that you need a webcam connected to your machine for the face recogn
 
 Once you have the Face Recognition Attendance System running, you can start using it by following these steps:
 
-1. **Home Page**: Open your web browser and navigate to `http://localhost:5000`. This will take you to the home page of the application.
+1. **Home Page**: Open your web browser and navigate to `http://127.0.0.1:5000/`. This will take you to the home page of the application.
 
 2. **Upload a New Face**: To add a new student to the system, click on the "Upload a new face as image" button. This will allow you to upload an image of the student's face. The image should be clear and the student's face should be visible. Also, you can capture the image from the camera by clicking on the "Capture a new face from camera" button.
 

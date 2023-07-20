@@ -23,6 +23,19 @@ predictor = dlib.shape_predictor(datFile)
 
 
 def detect_faces(img):
+    '''The function `detect_faces` takes an image as input, converts it
+    to grayscale, detects faces using a cascade classifier, and returns
+    a list of coordinates representing the detected faces.
+    
+    Parameters
+    ----------
+    img
+        The input image on which you want to detect faces.
+    
+    Returns
+    -------
+        a list of faces detected in the image.
+    '''
     # Convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # Display the frame
@@ -37,6 +50,22 @@ def detect_faces(img):
 
 
 def align_face(img, face):
+    '''The `align_face` function takes an image and a bounding box of a face as input, and aligns the face
+    in the image based on the position of the eyes.
+    
+    Parameters
+    ----------
+    img
+        The input image that contains the face you want to align. It should be in BGR format.
+    face
+        The "face" parameter is a list containing the coordinates and dimensions of the detected face in
+    the image. It should have the format [x, y, width, height], where:
+    
+    Returns
+    -------
+        the aligned face image.
+    
+    '''
     # Convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -53,7 +82,8 @@ def align_face(img, face):
     desired_face_width = 256
     desired_face_height = desired_face_width
 
-    # Specify the indexes of the facial landmarks for the left eye and the right eye
+    # Specify the indexes of the facial landmarks
+    # for the left eye and the right eye
     left_eye_landmarks = [36, 37, 38, 39, 40, 41]
     right_eye_landmarks = [42, 43, 44, 45, 46, 47]
 
@@ -66,7 +96,9 @@ def align_face(img, face):
     dX = right_eye_center[0] - left_eye_center[0]
     angle = np.degrees(np.arctan2(dY, dX))
 
-    # Calculate the scale of the new resulting image by taking the ratio of the distance between eyes in the current image to the ratio of distance between eyes in the desired image
+    # Calculate the scale of the new resulting image by taking the ratio of
+    # the distance between eyes in the current image to the ratio of distance
+    # between eyes in the desired image
     dist = np.sqrt((dX**2) + (dY**2))
     desired_dist = (
         desired_face_width * 0.27
@@ -117,6 +149,20 @@ def align_face(img, face):
 
 
 def extract_features(face):
+    '''The function "extract_features" takes a face image as input, converts it to RGB color format, and
+    uses the DeepFace model to predict the embedding of the face.
+    
+    Parameters
+    ----------
+    face
+        The "face" parameter is an image of a face that you want to extract features from. It is expected
+    to be in BGR color format, which is the default color format used by OpenCV.
+    
+    Returns
+    -------
+        the embedding of the face, which is a numerical representation of the face's features.
+
+    '''
     # Convert the face to RGB color format
     face_rgb = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
 
@@ -127,15 +173,36 @@ def extract_features(face):
 
 
 def match_face(embedding, database):
+    '''The function `match_face` takes an input face embedding and a database of face embeddings, and
+    returns the name of the closest matching face in the database if the distance is below a certain
+    threshold, otherwise it returns None.
+    
+    Parameters
+    ----------
+    embedding
+        The embedding parameter is a numerical representation of a face. It is typically a vector of
+    numbers that captures the unique features of a face.
+    database
+        The database parameter is a dictionary that contains the embeddings of known faces. The keys of the
+    dictionary are the names of the individuals and the values are the corresponding embeddings.
+    
+    Returns
+    -------
+        the name of the closest match in the database if the minimum distance is less than 0.50. Otherwise,
+    it returns None.
+    
+    '''
     min_distance = 100  # Initialize min_distance with a large number
     match = None  # Initialize match with None
 
     # Loop over all faces in the database
     for name, db_embedding in database.items():
-        # Calculate the cosine distance between the input embedding and the database embedding
+        # Calculate the cosine distance between the input
+        # embedding and the database embedding
         distance = cosine(embedding, db_embedding)
 
-        # If the distance is less than the min_distance, update the min_distance and match
+        # If the distance is less than the min_distance, update
+        # the min_distance and match
         if distance < min_distance:
             min_distance = distance
             match = name

@@ -128,7 +128,7 @@ This will create a virtual environment and activate it. All the dependencies wil
 
    Please note that you need to download the shape predictor file 'shape_predictor_68_face_landmarks.dat' from the dlib website. You can download the file from [here](https://github.com/italojs/facial-landmarks-recognition/blob/master/shape_predictor_68_face_landmarks.dat). You can put the file in the detection folder and you need to write full path of the file in the face_matching.py file for the **datFile** variable as below.
 
-   ![datfile](docs/images/datfile.png)
+   ![datfile](docs/images/datFile.png)
 
 4. **Set Up Firebase**: The system uses Firebase for database operations. You need to set up a Firebase project and replace the Firebase configuration in the project with your own. You can follow the [Firebase setup guide](https://firebase.google.com/docs/web/setup) for instructions.
    1. First you need to create a project in Firebase.

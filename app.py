@@ -16,7 +16,7 @@ from utils.configuration import load_yaml
 config_file_path = load_yaml("configs/database.yaml")
 
 TEACHER_PASSWORD_HASH = config_file_path["teacher"]["password_hash"]
-print(TEACHER_PASSWORD_HASH)
+# print(TEACHER_PASSWORD_HASH)
 
 # Initialize Firebase
 cred = credentials.Certificate(config_file_path["firebase"]["pathToServiceAccount"])

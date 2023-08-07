@@ -13,6 +13,7 @@ This project is an excellent example of how computer vision and machine learning
 - [Face Recognition Attendance System](#face-recognition-attendance-system)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
+  - [Project Demo](#project-demo)
   - [Features](#features)
     - [Screenshots](#screenshots)
   - [Installation](#installation)
@@ -37,6 +38,16 @@ The system is built using Python, Flask, OpenCV, and Firebase. Python and Flask 
 The system also includes a secure login feature for teachers, allowing them to view the attendance records. This feature ensures that only authorized individuals have access to the attendance data.
 
 Whether you're a university looking to streamline your attendance tracking process or a business looking to automate your employee check-in system, our Face Recognition Attendance System provides a robust and efficient solution.
+
+## Project Demo
+
+***Please Click The Picture Below For the Project Video***
+
+<p align="center">
+<a href=https://youtu.be/nRI_oEqiG-g>
+<img src="docs/images/youtube.png" alt="drawing"/></a>
+</p>
+
 
 ## Features
 
